@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: 'https://farmacia-backend-yr0c.onrender.com/api'
 });
 
 // Agregar token automáticamente en cada petición
