@@ -9,6 +9,7 @@ import Productos from './pages/productos/Productos';
 import Clientes from './pages/clientes/Clientes';
 import Compras from './pages/compras/Compras';
 import Ventas from './pages/ventas/Ventas';
+import Usuarios from './pages/usuarios/Usuarios'
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +27,7 @@ function App() {
           <Route path="clientes" element={<Clientes />} />
           <Route path="compras" element={<Compras />} />
            <Route path="ventas"        element={<Ventas />}      />
+           <Route path="usuarios"        element={<Usuarios />}      />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
