@@ -6,22 +6,37 @@ import {
 } from 'react-icons/fa';
 import { useAuth }   from '../../context/AuthContext';
 
-const menu = [
-  { path: '/',            icono: <FaTachometerAlt />, label: 'Dashboard'   },
-  { path: '/productos',   icono: <FaPills />,         label: 'Productos'   },
-  { path: '/categorias',  icono: <FaBoxes />,         label: 'Categorías'  },
-  { path: '/proveedores', icono: <FaTruck />,         label: 'Proveedores' },
-  { path: '/clientes',    icono: <FaUsers />,         label: 'Clientes'    },
-  { path: '/compras',     icono: <FaShoppingCart />,  label: 'Compras'     },
-  { path: '/ventas',      icono: <FaCashRegister />,  label: 'Ventas'      },
-];
-
-const menuAdmin = [
-  { path: '/usuarios', icono: <FaUsersCog />, label: 'Usuarios' },
-];
+// ─── Menú por rol ─────────────────────────────────────────
+const menuPorRol = {
+  admin: [
+    { path: '/',            icono: <FaTachometerAlt />, label: 'Dashboard'   },
+    { path: '/productos',   icono: <FaPills />,         label: 'Productos'   },
+    { path: '/categorias',  icono: <FaBoxes />,         label: 'Categorías'  },
+    { path: '/proveedores', icono: <FaTruck />,         label: 'Proveedores' },
+    { path: '/clientes',    icono: <FaUsers />,         label: 'Clientes'    },
+    { path: '/compras',     icono: <FaShoppingCart />,  label: 'Compras'     },
+    { path: '/ventas',      icono: <FaCashRegister />,  label: 'Ventas'      },
+  ],
+  cajero: [
+    { path: '/',          icono: <FaTachometerAlt />, label: 'Dashboard' },
+    { path: '/ventas',    icono: <FaCashRegister />,  label: 'Ventas'    },
+    { path: '/clientes',  icono: <FaUsers />,         label: 'Clientes'  },
+    { path: '/productos', icono: <FaPills />,         label: 'Productos' },
+  ],
+  bodeguero: [
+    { path: '/',            icono: <FaTachometerAlt />, label: 'Dashboard'   },
+    { path: '/productos',   icono: <FaPills />,         label: 'Productos'   },
+    { path: '/categorias',  icono: <FaBoxes />,         label: 'Categorías'  },
+    { path: '/proveedores', icono: <FaTruck />,         label: 'Proveedores' },
+    { path: '/compras',     icono: <FaShoppingCart />,  label: 'Compras'     },
+  ]
+};
 
 const Sidebar = ({ onClose }) => {
   const { usuario } = useAuth();
+
+  // Obtener menú según rol
+  const menu = menuPorRol[usuario?.rol] || menuPorRol.cajero;
 
   const estiloLink = ({ isActive }) => ({
     display:        'flex',
@@ -46,12 +61,12 @@ const Sidebar = ({ onClose }) => {
       flexDirection: 'column'
     }}>
 
-      {/* Logo + botón cerrar en móvil */}
+      {/* Logo + botón cerrar */}
       <div style={{
-        padding:      '20px',
-        borderBottom: '1px solid #2d3448',
-        display:      'flex',
-        alignItems:   'center',
+        padding:        '20px',
+        borderBottom:   '1px solid #2d3448',
+        display:        'flex',
+        alignItems:     'center',
         justifyContent: 'space-between'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -61,24 +76,37 @@ const Sidebar = ({ onClose }) => {
             <div style={{ fontSize: '11px', color: '#8892a4' }}>Sistema de Gestión</div>
           </div>
         </div>
-
-        {/* Botón X solo en móvil */}
         <button
           onClick={onClose}
           style={{
-            background: 'none',
-            border:     'none',
-            color:      '#8892a4',
-            cursor:     'pointer',
-            padding:    '4px',
-            display:    'flex'
+            background: 'none', border: 'none',
+            color: '#8892a4', cursor: 'pointer',
+            padding: '4px', display: 'flex'
           }}
         >
           <FaTimes size={18} />
         </button>
       </div>
 
-      {/* Menú */}
+      {/* Rol del usuario */}
+      <div style={{
+        padding:       '12px 20px',
+        borderBottom:  '1px solid #2d3448',
+        display:       'flex',
+        alignItems:    'center',
+        gap:           '8px'
+      }}>
+        <FaUsersCog size={14} color="#8892a4" />
+        <span style={{
+          fontSize:      '12px',
+          color:         '#8892a4',
+          textTransform: 'capitalize'
+        }}>
+          {usuario?.nombre} — {usuario?.rol}
+        </span>
+      </div>
+
+      {/* Menú según rol */}
       <nav style={{ padding: '12px 0', flex: 1 }}>
         {menu.map((item) => (
           <NavLink
@@ -93,7 +121,7 @@ const Sidebar = ({ onClose }) => {
           </NavLink>
         ))}
 
-        {/* Solo admin */}
+        {/* Sección admin — solo visible para admin */}
         {usuario?.rol === 'admin' && (
           <>
             <div style={{
@@ -105,17 +133,14 @@ const Sidebar = ({ onClose }) => {
             }}>
               Administración
             </div>
-            {menuAdmin.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                style={estiloLink}
-                onClick={onClose}
-              >
-                {item.icono}
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+            <NavLink
+              to="/usuarios"
+              style={estiloLink}
+              onClick={onClose}
+            >
+              <FaUsersCog />
+              <span>Usuarios</span>
+            </NavLink>
           </>
         )}
       </nav>
