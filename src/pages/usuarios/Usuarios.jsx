@@ -1,11 +1,14 @@
-import { useState, useEffect }                  from 'react';
-import { Modal, Button, Table, Form, Row, Col } from 'react-bootstrap';
-import API           from '../../api/axios';
-import Loading       from '../../components/common/Loading';
-import AlertaMensaje from '../../components/common/AlertaMensaje';
+import { useState, useEffect }  from 'react';
+import { Button, Table }        from 'react-bootstrap';
+import API                      from '../../api/axios';
+import Loading                  from '../../components/common/Loading';
+import AlertaMensaje             from '../../components/common/AlertaMensaje';
+import ModalUsuario              from './ModalUsuario';
+import ModalPassword             from './ModalPassword';
+import ModalEliminarUsuario      from './ModalEliminarUsuario';
 import { FaPlus, FaEdit, FaTrash, FaKey } from 'react-icons/fa';
 
-const inicial = { nombre: '', email: '', password: '', rol: 'cajero' };
+const inicial     = { nombre: '', email: '', password: '', rol: 'cajero' };
 const inicialPass = { password_actual: '', password_nuevo: '', confirmar: '' };
 
 const rolColor = {
@@ -19,16 +22,23 @@ const Usuarios = () => {
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
   const [exito,      setExito]      = useState('');
+
+  // Modales
   const [modal,      setModal]      = useState(false);
   const [modalElim,  setModalElim]  = useState(false);
   const [modalPass,  setModalPass]  = useState(false);
+
+  // Forms
   const [form,       setForm]       = useState(inicial);
   const [formPass,   setFormPass]   = useState(inicialPass);
+
+  // Seleccionados
   const [editando,   setEditando]   = useState(null);
   const [eliminando, setEliminando] = useState(null);
   const [cambiando,  setCambiando]  = useState(null);
   const [guardando,  setGuardando]  = useState(false);
 
+  // ─── Cargar ────────────────────────────────────────────
   const cargar = async () => {
     try {
       setLoading(true);
@@ -41,10 +51,9 @@ const Usuarios = () => {
     }
   };
 
-  useEffect(() => {
-    cargar();
-  }, []);
+  useEffect(() => { cargar(); }, []);
 
+  // ─── Abrir modales ─────────────────────────────────────
   const abrirCrear = () => {
     setForm(inicial);
     setEditando(null);
@@ -63,6 +72,7 @@ const Usuarios = () => {
     setModalPass(true);
   };
 
+  // ─── Guardar usuario ───────────────────────────────────
   const guardar = async (e) => {
     e.preventDefault();
     setGuardando(true);
@@ -87,6 +97,7 @@ const Usuarios = () => {
     }
   };
 
+  // ─── Cambiar contraseña ────────────────────────────────
   const guardarPassword = async (e) => {
     e.preventDefault();
     if (formPass.password_nuevo !== formPass.confirmar) {
@@ -108,11 +119,7 @@ const Usuarios = () => {
     }
   };
 
-  const confirmarEliminar = (u) => {
-    setEliminando(u);
-    setModalElim(true);
-  };
-
+  // ─── Eliminar ──────────────────────────────────────────
   const eliminar = async () => {
     try {
       await API.delete(`/usuarios/${eliminando.id}`);
@@ -123,9 +130,6 @@ const Usuarios = () => {
       setError(err.response?.data?.mensaje || 'Error al eliminar');
     }
   };
-
-  const handleChange     = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleChangePass = (e) => setFormPass({ ...formPass, [e.target.name]: e.target.value });
 
   if (loading) return <Loading />;
 
@@ -164,7 +168,10 @@ const Usuarios = () => {
           <thead style={{ background: '#f8fafc' }}>
             <tr>
               {['#', 'Nombre', 'Email', 'Rol', 'Acciones'].map(h => (
-                <th key={h} style={{ padding: '14px 20px', color: '#8892a4', fontWeight: 600, fontSize: '13px' }}>
+                <th key={h} style={{
+                  padding: '14px 20px', color: '#8892a4',
+                  fontWeight: 600, fontSize: '13px'
+                }}>
                   {h}
                 </th>
               ))}
@@ -185,10 +192,10 @@ const Usuarios = () => {
                   <td style={{ padding: '14px 20px', color: '#8892a4' }}>{u.email}</td>
                   <td style={{ padding: '14px 20px' }}>
                     <span style={{
-                      background:   rolColor[u.rol]?.bg,
-                      color:        rolColor[u.rol]?.color,
-                      borderRadius: '6px', padding: '3px 10px',
-                      fontSize: '12px', fontWeight: 600,
+                      background:    rolColor[u.rol]?.bg,
+                      color:         rolColor[u.rol]?.color,
+                      borderRadius:  '6px', padding: '3px 10px',
+                      fontSize:      '12px', fontWeight: 600,
                       textTransform: 'capitalize'
                     }}>
                       {u.rol}
@@ -210,7 +217,7 @@ const Usuarios = () => {
                       }}>
                         <FaKey />
                       </button>
-                      <button onClick={() => confirmarEliminar(u)} style={{
+                      <button onClick={() => { setEliminando(u); setModalElim(true); }} style={{
                         background: '#fff5f5', color: '#fc8181',
                         border: 'none', borderRadius: '6px',
                         padding: '6px 10px', cursor: 'pointer'
@@ -226,147 +233,33 @@ const Usuarios = () => {
         </Table>
       </div>
 
-      {/* Modal Crear/Editar */}
-      <Modal show={modal} onHide={() => setModal(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>
-            {editando ? 'Editar Usuario' : 'Nuevo Usuario'}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={guardar}>
-          <Modal.Body style={{ padding: '20px 24px' }}>
-            <Row>
-              <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Nombre *</Form.Label>
-                  <Form.Control
-                    name="nombre" value={form.nombre}
-                    onChange={handleChange} required
-                    placeholder="Nombre completo"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Email *</Form.Label>
-                  <Form.Control
-                    type="email" name="email" value={form.email}
-                    onChange={handleChange} required
-                    placeholder="correo@farmacia.com"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              {!editando && (
-                <Col md={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Contraseña *</Form.Label>
-                    <Form.Control
-                      type="password" name="password" value={form.password}
-                      onChange={handleChange} required
-                      placeholder="Mínimo 6 caracteres"
-                      style={{ borderRadius: '8px' }}
-                    />
-                  </Form.Group>
-                </Col>
-              )}
-              <Col md={12}>
-                <Form.Group>
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Rol *</Form.Label>
-                  <Form.Select
-                    name="rol" value={form.rol}
-                    onChange={handleChange}
-                    style={{ borderRadius: '8px' }}
-                  >
-                    <option value="cajero">Cajero</option>
-                    <option value="bodeguero">Bodeguero</option>
-                    <option value="admin">Admin</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-          </Modal.Body>
-          <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-            <Button variant="light" onClick={() => setModal(false)} style={{ borderRadius: '8px' }}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={guardando} style={{
-              background: '#4e9af1', border: 'none', borderRadius: '8px'
-            }}>
-              {guardando ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      {/* Modales */}
+      <ModalUsuario
+        show={modal}
+        onHide={() => setModal(false)}
+        form={form}
+        onChange={e => setForm({ ...form, [e.target.name]: e.target.value })}
+        onSubmit={guardar}
+        editando={editando}
+        guardando={guardando}
+      />
 
-      {/* Modal Cambiar Contraseña */}
-      <Modal show={modalPass} onHide={() => setModalPass(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>
-            Cambiar Contraseña — {cambiando?.nombre}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={guardarPassword}>
-          <Modal.Body style={{ padding: '20px 24px' }}>
-            <Form.Group className="mb-3">
-              <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Contraseña actual *</Form.Label>
-              <Form.Control
-                type="password" name="password_actual"
-                value={formPass.password_actual}
-                onChange={handleChangePass} required
-                style={{ borderRadius: '8px' }}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Nueva contraseña *</Form.Label>
-              <Form.Control
-                type="password" name="password_nuevo"
-                value={formPass.password_nuevo}
-                onChange={handleChangePass} required
-                style={{ borderRadius: '8px' }}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Confirmar contraseña *</Form.Label>
-              <Form.Control
-                type="password" name="confirmar"
-                value={formPass.confirmar}
-                onChange={handleChangePass} required
-                style={{ borderRadius: '8px' }}
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-            <Button variant="light" onClick={() => setModalPass(false)} style={{ borderRadius: '8px' }}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={guardando} style={{
-              background: '#48bb78', border: 'none', borderRadius: '8px'
-            }}>
-              {guardando ? 'Guardando...' : 'Cambiar Contraseña'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      <ModalPassword
+        show={modalPass}
+        onHide={() => setModalPass(false)}
+        form={formPass}
+        onChange={e => setFormPass({ ...formPass, [e.target.name]: e.target.value })}
+        onSubmit={guardarPassword}
+        usuario={cambiando}
+        guardando={guardando}
+      />
 
-      {/* Modal Eliminar */}
-      <Modal show={modalElim} onHide={() => setModalElim(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none' }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>Eliminar Usuario</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ padding: '0 24px 20px' }}>
-          ¿Estás seguro que deseas eliminar a <strong>{eliminando?.nombre}</strong>?
-        </Modal.Body>
-        <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-          <Button variant="light" onClick={() => setModalElim(false)} style={{ borderRadius: '8px' }}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={eliminar} style={{ borderRadius: '8px' }}>
-            Eliminar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <ModalEliminarUsuario
+        show={modalElim}
+        onHide={() => setModalElim(false)}
+        usuario={eliminando}
+        onEliminar={eliminar}
+      />
     </div>
   );
 };
