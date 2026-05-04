@@ -1,9 +1,11 @@
 import { useState, useEffect }        from 'react';
-import { Modal, Button, Table, Form, Row, Col } from 'react-bootstrap';
+import {  Button, Table } from 'react-bootstrap';
 import API           from '../../api/axios';
 import Loading       from '../../components/common/Loading';
 import AlertaMensaje from '../../components/common/AlertaMensaje';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { ModalCrearProveedor } from './ModalCrearProveedor';
+import { ModalEliminarProveedor } from './ModalEliminarProveedor';
 
 const inicial = {
   nombre: '', ruc: '', telefono: '', email: '', direccion: ''
@@ -179,103 +181,29 @@ const Proveedores = () => {
       </div>
 
       {/* Modal Crear/Editar */}
-      <Modal show={modal} onHide={() => setModal(false)} centered size="lg">
-        <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>
-            {editando ? 'Editar Proveedor' : 'Nuevo Proveedor'}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={guardar}>
-          <Modal.Body style={{ padding: '20px 24px' }}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Nombre *</Form.Label>
-                  <Form.Control
-                    name="nombre" value={form.nombre}
-                    onChange={handleChange} required
-                    placeholder="Nombre del proveedor"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>RUC</Form.Label>
-                  <Form.Control
-                    name="ruc" value={form.ruc}
-                    onChange={handleChange}
-                    placeholder="RUC del proveedor"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Teléfono</Form.Label>
-                  <Form.Control
-                    name="telefono" value={form.telefono}
-                    onChange={handleChange}
-                    placeholder="Teléfono"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Email</Form.Label>
-                  <Form.Control
-                    type="email" name="email" value={form.email}
-                    onChange={handleChange}
-                    placeholder="correo@proveedor.com"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={12}>
-                <Form.Group>
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Dirección</Form.Label>
-                  <Form.Control
-                    as="textarea" rows={2}
-                    name="direccion" value={form.direccion}
-                    onChange={handleChange}
-                    placeholder="Dirección del proveedor"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-          </Modal.Body>
-          <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-            <Button variant="light" onClick={() => setModal(false)} style={{ borderRadius: '8px' }}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={guardando} style={{
-              background: '#4e9af1', border: 'none', borderRadius: '8px'
-            }}>
-              {guardando ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      <ModalCrearProveedor
+      show={modal}
+      form={form}
+      onHide={() => setModal(false)}
+      onSubmit={guardar}
+      onChange={handleChange}
+       onClick={() => setModal(false)}
+       editando={editando}
+       guardando={guardando}
+      
+      />
+      
 
       {/* Modal Eliminar */}
-      <Modal show={modalElim} onHide={() => setModalElim(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none' }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>Eliminar Proveedor</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ padding: '0 24px 20px' }}>
-          ¿Estás seguro que deseas eliminar a <strong>{eliminando?.nombre}</strong>?
-        </Modal.Body>
-        <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-          <Button variant="light" onClick={() => setModalElim(false)} style={{ borderRadius: '8px' }}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={eliminar} style={{ borderRadius: '8px' }}>
-            Eliminar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+
+      <ModalEliminarProveedor
+      show={modalElim} 
+      onHide={() => setModalElim(false)}
+      proveedor={eliminando}
+      onEliminar={eliminar}
+      />
+    
+
     </div>
   );
 };

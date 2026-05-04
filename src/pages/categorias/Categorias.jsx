@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Modal, Button, Table, Form } from 'react-bootstrap';
+import {  Button, Table } from 'react-bootstrap';
 import API             from '../../api/axios';
 import Loading         from '../../components/common/Loading';
 import AlertaMensaje   from '../../components/common/AlertaMensaje';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { ModalCrearCategoria } from './ModalCrearCategoria';
+import { ModelEliminarCategoria } from './ModelEliminarCategoria';
 
 const inicial = { nombre: '', descripcion: '' };
 
@@ -200,92 +202,23 @@ const Categorias = () => {
       </div>
 
       {/* Modal Crear/Editar */}
-      <Modal show={modal} onHide={() => setModal(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>
-            {editando ? 'Editar Categoría' : 'Nueva Categoría'}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={guardar}>
-          <Modal.Body style={{ padding: '20px 24px' }}>
-            <Form.Group className="mb-3">
-              <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>
-                Nombre *
-              </Form.Label>
-              <Form.Control
-                type="text"
-                value={form.nombre}
-                onChange={e => setForm({ ...form, nombre: e.target.value })}
-                placeholder="Ej: Analgésicos"
-                required
-                style={{ borderRadius: '8px' }}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>
-                Descripción
-              </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={form.descripcion}
-                onChange={e => setForm({ ...form, descripcion: e.target.value })}
-                placeholder="Descripción opcional"
-                style={{ borderRadius: '8px' }}
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-            <Button
-              variant="light"
-              onClick={() => setModal(false)}
-              style={{ borderRadius: '8px' }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={guardando}
-              style={{
-                background:   '#4e9af1',
-                border:       'none',
-                borderRadius: '8px'
-              }}
-            >
-              {guardando ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+         <ModalCrearCategoria
+        show={modal}
+        onHide={() => setModal(false)}
+        form={form}
+        onChange={e => setForm({ ...form, [e.target.name]: e.target.value })}
+        onSubmit={guardar}
+        editando={editando}
+        guardando={guardando}
+      />
 
       {/* Modal Eliminar */}
-      <Modal show={modalElim} onHide={() => setModalElim(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none' }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>
-            Eliminar Categoría
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ padding: '0 24px 20px' }}>
-          ¿Estás seguro que deseas eliminar la categoría{' '}
-          <strong>{eliminando?.nombre}</strong>?
-        </Modal.Body>
-        <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-          <Button
-            variant="light"
-            onClick={() => setModalElim(false)}
-            style={{ borderRadius: '8px' }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            onClick={eliminar}
-            style={{ borderRadius: '8px' }}
-          >
-            Eliminar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+    <ModelEliminarCategoria
+     show={modalElim}
+        onHide={() => setModalElim(false)}
+        categoria={eliminando}
+        onEliminar={eliminar}
+      />
     </div>
   );
 };
