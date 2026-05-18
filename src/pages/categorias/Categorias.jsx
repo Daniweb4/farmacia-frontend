@@ -41,7 +41,10 @@ const Categorias = () => {
       setLoading(false);
     }
   };
-  useEffect(() => { cargar(pagina); }, [pagina]);
+  useEffect(() => {
+  cargar(pagina);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [pagina]);
 
   // ─── Abrir modal crear ──────────────────────────────────
   const abrirCrear = () => {

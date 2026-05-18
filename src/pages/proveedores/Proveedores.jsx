@@ -1,261 +1,252 @@
-import { useState, useEffect } from 'react';
-import { Button, Table } from 'react-bootstrap';
-import API from '../../api/axios';
-import Loading from '../../components/common/Loading';
-import AlertaMensaje from '../../components/common/AlertaMensaje';
-import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import { ModalCrearProveedor } from './ModalCrearProveedor';
+import { useState, useEffect }  from 'react';
+import { Button, Table }        from 'react-bootstrap';
+import API                      from '../../api/axios';
+import Loading                  from '../../components/common/Loading';
+import AlertaMensaje            from '../../components/common/AlertaMensaje';
+import Paginacion               from '../../components/common/Paginacion';
+import { ModalCrearProveedor }  from './ModalCrearProveedor';
 import { ModalEliminarProveedor } from './ModalEliminarProveedor';
-import Paginacion from '../../components/common/Paginacion';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 const inicial = { nombre: '', ruc: '', telefono: '', email: '', direccion: '' };
 
 const Proveedores = () => {
-    const [proveedores, setProveedores] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [exito, setExito] = useState('');
-    const [modal, setModal] = useState(false);
-    const [modalElim, setModalElim] = useState(false);
-    const [form, setForm] = useState(inicial);
-    const [editando, setEditando] = useState(null);
-    const [eliminando, setEliminando] = useState(null);
-    const [guardando, setGuardando] = useState(false);
-    //Estado de paginacion 
-    const [paginacion, setPaginacion] = useState(null);
-    const [pagina, setPagina] = useState(1);
+  const [proveedores, setProveedores] = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState('');
+  const [exito,       setExito]       = useState('');
+  const [modal,       setModal]       = useState(false);
+  const [modalElim,   setModalElim]   = useState(false);
+  const [form,        setForm]        = useState(inicial);
+  const [editando,    setEditando]    = useState(null);
+  const [eliminando,  setEliminando]  = useState(null);
+  const [guardando,   setGuardando]   = useState(false);
+  const [paginacion,  setPaginacion]  = useState(null);
+  const [pagina,      setPagina]      = useState(1);
 
-    const cargar = async (p = pagina) => {
-        try {
-            setLoading(true); const { data } = await API.get('/proveedores',
-                { params: { page: p, limit: 3 } });
-            setProveedores(data.data);
-            setPaginacion(data.paginacion);
-        }
+  // ─── Cargar ────────────────────────────────────────────
+  const cargar = async (p = 1) => {
+    try {
+      setLoading(true);
+      const { data } = await API.get('/proveedores', {
+        params: { page: p, limit: 3 }
+      });
+      setProveedores(data.data);
+      setPaginacion(data.paginacion);
+    } catch {
+      setError('Error al cargar proveedores');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        catch { setError('Error al cargar proveedores'); }
-        finally { setLoading(false); }
-    };
+  useEffect(() => {
+    cargar(pagina);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagina]);
 
-    useEffect(() => { cargar(pagina); }, [pagina]);
+  // ─── Modales ───────────────────────────────────────────
+  const abrirCrear = () => {
+    setForm(inicial);
+    setEditando(null);
+    setModal(true);
+  };
 
-    const abrirCrear = () => {
-        setForm(inicial);
-        setEditando(null);
-        setModal(true);
-    };
-    const abrirEditar = (p) => {
-        setForm({
-            nombre: p.nombre,
-            ruc: p.ruc || '',
-            telefono: p.telefono || '',
-            email: p.email || '',
-            direccion: p.direccion || ''
-        });
-        setEditando(p.id); setModal(true);
-    };
-    const guardar = async (e) => {
-        e.preventDefault(); setGuardando(true);
+  const abrirEditar = (p) => {
+    setForm({
+      nombre:    p.nombre,
+      ruc:       p.ruc       || '',
+      telefono:  p.telefono  || '',
+      email:     p.email     || '',
+      direccion: p.direccion || ''
+    });
+    setEditando(p.id);
+    setModal(true);
+  };
 
-        try {
-            if (editando) {
-                await API.put(/proveedores/${ editando }, form);
-                setExito('Proveedor actualizado correctamente');
-            }
-            else {
-                await API.post('/proveedores', form);
-                setExito('Proveedor creado correctamente');
-            }
+  // ─── Guardar ───────────────────────────────────────────
+  const guardar = async (e) => {
+    e.preventDefault();
+    setGuardando(true);
+    try {
+      if (editando) {
+        await API.put(`/proveedores/${editando}`, form);
+        setExito('Proveedor actualizado correctamente');
+      } else {
+        await API.post('/proveedores', form);
+        setExito('Proveedor creado correctamente');
+      }
+      setModal(false);
+      cargar(pagina);
+    } catch (err) {
+      setError(err.response?.data?.mensaje || 'Error al guardar');
+    } finally {
+      setGuardando(false);
+    }
+  };
 
-            setModal(false); cargar();
-        } catch (err) {
-            setError(err.response?.data?.mensaje || 'Error al guardar');
-        }
-        finally { setGuardando(false); }
+  // ─── Eliminar ──────────────────────────────────────────
+  const confirmarEliminar = (p) => {
+    setEliminando(p);
+    setModalElim(true);
+  };
 
-    };
+  const eliminar = async () => {
+    try {
+      await API.delete(`/proveedores/${eliminando.id}`);
+      setExito('Proveedor eliminado correctamente');
+      setModalElim(false);
+      cargar(pagina);
+    } catch (err) {
+      setError(err.response?.data?.mensaje || 'Error al eliminar');
+    }
+  };
 
-    const confirmarEliminar = (p) => {
-        setEliminando(p); setModalElim(true);
-    };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-    const eliminar = async () => {
-        try {
-            await API.delete(/proveedores/${ eliminando.id });
-            setExito('Proveedor eliminado correctamente');
-            setModalElim(false); cargar();
-        }
+  if (loading) return <Loading />;
 
-        catch (err) { setError(err.response?.data?.mensaje || 'Error al eliminar'); }
-    };
+  return (
+    <div>
+      {/* Título */}
+      <div style={{
+        display:        'flex',
+        justifyContent: 'space-between',
+        alignItems:     'center',
+        marginBottom:   '24px',
+        flexWrap:       'wrap',
+        gap:            '12px'
+      }}>
+        <div>
+          <h4 style={{ margin: 0, fontWeight: 700, color: '#1a1f2e' }}>
+            Proveedores
+          </h4>
+          <p style={{ margin: '4px 0 0', color: '#8892a4', fontSize: '14px' }}>
+            {paginacion?.total || 0} proveedores registrados
+          </p>
+        </div>
+        <Button onClick={abrirCrear} style={{
+          background:   '#4e9af1',
+          border:       'none',
+          borderRadius: '8px',
+          padding:      '8px 16px',
+          display:      'flex',
+          alignItems:   'center',
+          gap:          '8px'
+        }}>
+          <FaPlus /> Nuevo Proveedor
+        </Button>
+      </div>
 
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
+      <AlertaMensaje tipo="danger"  mensaje={error} onClose={() => setError('')} />
+      <AlertaMensaje tipo="success" mensaje={exito} onClose={() => setExito('')} />
 
-    if (loading) return <Loading />;
-
-    return (
-        <div> {/* Título */}
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '24px',
-                    flexWrap: 'wrap',
-                    gap: '12px'
+      {/* Tabla */}
+      <div style={{
+        background:   '#fff',
+        borderRadius: '12px',
+        boxShadow:    '0 1px 4px rgba(0,0,0,0.08)',
+        overflow:     'hidden'
+      }}>
+        <Table hover responsive style={{ margin: 0 }}>
+          <thead style={{ background: '#f8fafc' }}>
+            <tr>
+              {['#', 'Nombre', 'RUC', 'Teléfono', 'Email', 'Acciones'].map(h => (
+                <th key={h} style={{
+                  padding:    '14px 20px',
+                  color:      '#8892a4',
+                  fontWeight: 600,
+                  fontSize:   '13px'
                 }}>
-                <div>
-                    <h4
-                        style={{
-                            margin: 0,
-                            fontWeight: 700,
-                            color: '#1a1f2e'
-                        }}>Proveedores</h4>
-                    <p style={{
-                        margin: '4px 0 0',
-                        color: '#8892a4',
-                        fontSize: '14px'
-                    }}> {proveedores.length} proveedores registrados </p>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {proveedores.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{
+                  textAlign: 'center',
+                  padding:   '40px',
+                  color:     '#8892a4'
+                }}>
+                  No hay proveedores registrados
+                </td>
+              </tr>
+            ) : (
+              proveedores.map((p, i) => (
+                <tr key={p.id}>
+                  <td style={{ padding: '14px 20px', color: '#8892a4' }}>
+                    {(pagina - 1) * 10 + i + 1}
+                  </td>
+                  <td style={{ padding: '14px 20px', fontWeight: 600, color: '#1a1f2e' }}>
+                    {p.nombre}
+                  </td>
+                  <td style={{ padding: '14px 20px', color: '#8892a4' }}>
+                    {p.ruc || '—'}
+                  </td>
+                  <td style={{ padding: '14px 20px', color: '#8892a4' }}>
+                    {p.telefono || '—'}
+                  </td>
+                  <td style={{ padding: '14px 20px', color: '#8892a4' }}>
+                    {p.email || '—'}
+                  </td>
+                  <td style={{ padding: '14px 20px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => abrirEditar(p)} style={{
+                        background:   '#ebf4ff',
+                        color:        '#4e9af1',
+                        border:       'none',
+                        borderRadius: '6px',
+                        padding:      '6px 10px',
+                        cursor:       'pointer'
+                      }}>
+                        <FaEdit />
+                      </button>
+                      <button onClick={() => confirmarEliminar(p)} style={{
+                        background:   '#fff5f5',
+                        color:        '#fc8181',
+                        border:       'none',
+                        borderRadius: '6px',
+                        padding:      '6px 10px',
+                        cursor:       'pointer'
+                      }}>
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </Table>
 
-                </div>
-                <Button
-                    onClick={abrirCrear}
-                    style={{
-                        background: '#4e9af1',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '8px 16px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                    }} >
-                    <FaPlus /> Nuevo Proveedor </Button>
+        <Paginacion
+          paginacion={paginacion}
+          onCambiar={(p) => setPagina(p)}
+        />
+      </div>
 
-            </div> <AlertaMensaje
-                tipo="danger"
-                mensaje={error}
-                onClose={() => setError('')} />
-            <AlertaMensaje
-                tipo="success"
-                mensaje={exito}
-                onClose={() => setExito('')} />
+      {/* Modales */}
+      <ModalCrearProveedor
+        show={modal}
+        onHide={() => setModal(false)}
+        form={form}
+        onChange={handleChange}
+        onSubmit={guardar}
+        editando={editando}
+        guardando={guardando}
+      />
 
-            {/* Tabla */}
-
-            <div style={{
-                background: '#fff',
-                borderRadius: '12px',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                overflow: 'hidden'
-            }}>
-
-                <Table hover responsive
-                    style={{ margin: 0 }}>
-
-                    <thead style={{ background: '#f8fafc' }}>
-                        <tr> {['#', 'Nombre', 'RUC', 'Teléfono', 'Email', 'Acciones'].map(h => (<th key={h}
-                            style={{
-                                padding: '14px 20px',
-                                color: '#8892a4',
-                                fontWeight: 600,
-                                fontSize: '13px'
-                            }}> {h} </th>))}
-                        </tr>
-                    </thead>
-                    <tbody> {proveedores.length === 0 ? (<tr> <td colSpan={6}
-                        style={{
-                            textAlign: 'center',
-                            padding: '40px',
-                            color: '#8892a4'
-                        }}> No hay proveedores registrados </td>
-                    </tr>) : (proveedores.map((p, i) => (<tr key={p.id}>
-                        <td style={{
-                            padding: '14px 20px',
-                            color: '#8892a4'
-                        }}>{i + 1}</td>
-                        <td style={{
-                            padding: '14px 20px',
-                            fontWeight: 600,
-                            color: '#1a1f2e'
-                        }}>
-                            {p.nombre}</td>
-                        <td style={{
-                            padding: '14px 20px',
-                            color: '#8892a4'
-                        }}>{p.ruc || '—'}</td>
-                        <td style={{
-                            padding: '14px 20px',
-                            color: '#8892a4'
-                        }}>{p.telefono || '—'}</td>
-                        <td style={{
-                            padding: '14px 20px',
-                            color: '#8892a4'
-                        }}>{p.email || '—'}</td>
-                        <td style={{
-                            padding: '14px 20px'
-                        }}>
-                            <div style={{
-                                display: 'flex',
-                                gap: '8px'
-                            }}>
-                                <button onClick={() => abrirEditar(p)}
-                                    style={{
-                                        background: '#ebf4ff',
-                                        color: '#4e9af1',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        padding: '6px 10px',
-                                        cursor: 'pointer'
-                                    }}>
-                                    <FaEdit />
-                                </button>
-                                <button onClick={() => confirmarEliminar(p)}
-                                    style={{
-                                        background: '#fff5f5',
-                                        color: '#fc8181',
-                                        border: 'none',
-                                        borderRadius: '6px',
-                                        padding: '6px 10px',
-                                        cursor: 'pointer'
-                                    }}>
-                                    <FaTrash />
-                                </button>
-                            </div>
-                        </td>
-                    </tr>))
-                    )} </tbody>
-                </Table>
-                {/* Dentro del div de la tabla, después del Table */}
-                <Paginacion
-                    paginacion={paginacion}
-                    onCambiar={(p) => setPagina(p)} />
-            </div>
-
-
-            {/* Modal Crear/Editar */}
-            <ModalCrearProveedor
-                show={modal} form={form}
-                onHide={() => setModal(false)}
-                onSubmit={guardar}
-                onChange={handleChange}
-                onClick={() => setModal(false)}
-                editando={editando}
-                guardando={guardando} />
-
-
-
-            {/* Modal Eliminar */}
-            <ModalEliminarProveedor
-                show={modalElim} onHide={() => setModalElim(false)}
-                proveedor={eliminando}
-                onEliminar={eliminar} />
-
-
-
-
-
-        </div>);
+      <ModalEliminarProveedor
+        show={modalElim}
+        onHide={() => setModalElim(false)}
+        proveedor={eliminando}
+        onEliminar={eliminar}
+      />
+    </div>
+  );
 };
 
-export default Proveedores
+export default Proveedores;
