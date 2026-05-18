@@ -6,6 +6,7 @@ import AlertaMensaje from '../../components/common/AlertaMensaje';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { ModalCrearProveedor } from './ModalCrearProveedor';
 import { ModalEliminarProveedor } from './ModalEliminarProveedor';
+import Paginacion from '../../components/common/Paginacion';
 
 const inicial = {
   nombre: '', ruc: '', telefono: '', email: '', direccion: ''
@@ -22,20 +23,26 @@ const Proveedores = () => {
   const [editando,    setEditando]    = useState(null);
   const [eliminando,  setEliminando]  = useState(null);
   const [guardando,   setGuardando]   = useState(false);
-
-  const cargar = async () => {
+ //Estado de paginacion
+  const [paginacion, setPaginacion] = useState(null);
+  const [pagina,     setPagina]     = useState(1);
+ 
+  const cargar = async (p = pagina) => {
     try {
       setLoading(true);
-      const { data } = await API.get('/proveedores');
+      const { data } = await API.get('/proveedores', {
+        params: { page: p, limit: 3 }
+    });
       setProveedores(data.data);
-    } catch {
+      setPaginacion(data.paginacion);
+  } catch {
       setError('Error al cargar proveedores');
-    } finally {
+  } finally {
       setLoading(false);
-    }
-  };
+  }
+};
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => { cargar(pagina); }, [pagina]);
 
   const abrirCrear = () => {
     setForm(inicial);
@@ -178,6 +185,10 @@ const Proveedores = () => {
             )}
           </tbody>
         </Table>
+        <Paginacion
+         paginacion={paginacion}
+         onCambiar={(p) => setPagina(p)}
+        />
       </div>
 
       {/* Modal Crear/Editar */}

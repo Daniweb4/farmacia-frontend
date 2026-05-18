@@ -204,7 +204,7 @@ const Categorias = () => {
             )}
           </tbody>
         </Table>
-        {/* Dentro del div de la tabla, después del Table */}
+    
         <Paginacion
          paginacion={paginacion}
          onCambiar={(p) => setPagina(p)}
