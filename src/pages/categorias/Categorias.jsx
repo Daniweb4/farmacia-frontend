@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import {  Button, Table } from 'react-bootstrap';
-import API             from '../../api/axios';
-import Loading         from '../../components/common/Loading';
-import AlertaMensaje   from '../../components/common/AlertaMensaje';
+import { Button, Table } from 'react-bootstrap';
+import API from '../../api/axios';
+import Loading from '../../components/common/Loading';
+import AlertaMensaje from '../../components/common/AlertaMensaje';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { ModalCrearCategoria } from './ModalCrearCategoria';
 import { ModelEliminarCategoria } from './ModelEliminarCategoria';
@@ -12,19 +12,19 @@ const inicial = { nombre: '', descripcion: '' };
 
 const Categorias = () => {
   const [categorias, setCategorias] = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState('');
-  const [exito,      setExito]      = useState('');
-//Paginacion
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [exito, setExito] = useState('');
+  //Paginacion
   const [paginacion, setPaginacion] = useState(null);
-  const [pagina,     setPagina]     = useState(1);
+  const [pagina, setPagina] = useState(1);
   // Modal
-  const [modal,      setModal]      = useState(false);
-  const [modalElim,  setModalElim]  = useState(false);
-  const [form,       setForm]       = useState(inicial);
-  const [editando,   setEditando]   = useState(null);
+  const [modal, setModal] = useState(false);
+  const [modalElim, setModalElim] = useState(false);
+  const [form, setForm] = useState(inicial);
+  const [editando, setEditando] = useState(null);
   const [eliminando, setEliminando] = useState(null);
-  const [guardando,  setGuardando]  = useState(false);
+  const [guardando, setGuardando] = useState(false);
 
   // ─── Cargar categorías ──────────────────────────────────
   const cargar = async (p = pagina) => {
@@ -32,15 +32,15 @@ const Categorias = () => {
       setLoading(true);
       const { data } = await API.get('/categorias', {
         params: { page: p, limit: 3 }
-    });
+      });
       setCategorias(data.data);
       setPaginacion(data.paginacion);
-  } catch {
+    } catch {
       setError('Error al cargar categorías');
-  } finally {
+    } finally {
       setLoading(false);
-  }
-};
+    }
+  };
   useEffect(() => { cargar(pagina); }, [pagina]);
 
   // ─── Abrir modal crear ──────────────────────────────────
@@ -101,12 +101,12 @@ const Categorias = () => {
     <div>
       {/* Título */}
       <div style={{
-        display:        'flex',
+        display: 'flex',
         justifyContent: 'space-between',
-        alignItems:     'center',
-        marginBottom:   '24px',
-        flexWrap:       'wrap',
-        gap:            '12px'
+        alignItems: 'center',
+        marginBottom: '24px',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         <div>
           <h4 style={{ margin: 0, fontWeight: 700, color: '#1a1f2e' }}>
@@ -119,13 +119,13 @@ const Categorias = () => {
         <Button
           onClick={abrirCrear}
           style={{
-            background:   '#4e9af1',
-            border:       'none',
+            background: '#4e9af1',
+            border: 'none',
             borderRadius: '8px',
-            padding:      '8px 16px',
-            display:      'flex',
-            alignItems:   'center',
-            gap:          '8px'
+            padding: '8px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}
         >
           <FaPlus /> Nueva Categoría
@@ -133,15 +133,15 @@ const Categorias = () => {
       </div>
 
       {/* Alertas */}
-      <AlertaMensaje tipo="danger"  mensaje={error} onClose={() => setError('')} />
+      <AlertaMensaje tipo="danger" mensaje={error} onClose={() => setError('')} />
       <AlertaMensaje tipo="success" mensaje={exito} onClose={() => setExito('')} />
 
       {/* Tabla */}
       <div style={{
-        background:   '#fff',
+        background: '#fff',
         borderRadius: '12px',
-        boxShadow:    '0 1px 4px rgba(0,0,0,0.08)',
-        overflow:     'hidden'
+        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+        overflow: 'hidden'
       }}>
         <Table hover responsive style={{ margin: 0 }}>
           <thead style={{ background: '#f8fafc' }}>
@@ -174,12 +174,12 @@ const Categorias = () => {
                       <button
                         onClick={() => abrirEditar(cat)}
                         style={{
-                          background:   '#ebf4ff',
-                          color:        '#4e9af1',
-                          border:       'none',
+                          background: '#ebf4ff',
+                          color: '#4e9af1',
+                          border: 'none',
                           borderRadius: '6px',
-                          padding:      '6px 10px',
-                          cursor:       'pointer'
+                          padding: '6px 10px',
+                          cursor: 'pointer'
                         }}
                       >
                         <FaEdit />
@@ -187,12 +187,12 @@ const Categorias = () => {
                       <button
                         onClick={() => confirmarEliminar(cat)}
                         style={{
-                          background:   '#fff5f5',
-                          color:        '#fc8181',
-                          border:       'none',
+                          background: '#fff5f5',
+                          color: '#fc8181',
+                          border: 'none',
                           borderRadius: '6px',
-                          padding:      '6px 10px',
-                          cursor:       'pointer'
+                          padding: '6px 10px',
+                          cursor: 'pointer'
                         }}
                       >
                         <FaTrash />
@@ -204,15 +204,15 @@ const Categorias = () => {
             )}
           </tbody>
         </Table>
-    
+      {/* Dentro del div de la tabla, después del Table */}
         <Paginacion
-         paginacion={paginacion}
-         onCambiar={(p) => setPagina(p)}
+          paginacion={paginacion}
+          onCambiar={(p) => setPagina(p)}
         />
       </div>
 
       {/* Modal Crear/Editar */}
-         <ModalCrearCategoria
+      <ModalCrearCategoria
         show={modal}
         onHide={() => setModal(false)}
         form={form}
@@ -223,8 +223,8 @@ const Categorias = () => {
       />
 
       {/* Modal Eliminar */}
-    <ModelEliminarCategoria
-     show={modalElim}
+      <ModelEliminarCategoria
+        show={modalElim}
         onHide={() => setModalElim(false)}
         categoria={eliminando}
         onEliminar={eliminar}

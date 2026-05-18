@@ -1,7 +1,7 @@
-import { useState, useEffect }        from 'react';
-import {  Button, Table } from 'react-bootstrap';
-import API           from '../../api/axios';
-import Loading       from '../../components/common/Loading';
+import { useState, useEffect } from 'react';
+import { Button, Table } from 'react-bootstrap';
+import API from '../../api/axios';
+import Loading from '../../components/common/Loading';
 import AlertaMensaje from '../../components/common/AlertaMensaje';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { ModalCrearProveedor } from './ModalCrearProveedor';
@@ -14,33 +14,33 @@ const inicial = {
 
 const Proveedores = () => {
   const [proveedores, setProveedores] = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState('');
-  const [exito,       setExito]       = useState('');
-  const [modal,       setModal]       = useState(false);
-  const [modalElim,   setModalElim]   = useState(false);
-  const [form,        setForm]        = useState(inicial);
-  const [editando,    setEditando]    = useState(null);
-  const [eliminando,  setEliminando]  = useState(null);
-  const [guardando,   setGuardando]   = useState(false);
- //Estado de paginacion
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [exito, setExito] = useState('');
+  const [modal, setModal] = useState(false);
+  const [modalElim, setModalElim] = useState(false);
+  const [form, setForm] = useState(inicial);
+  const [editando, setEditando] = useState(null);
+  const [eliminando, setEliminando] = useState(null);
+  const [guardando, setGuardando] = useState(false);
+  //Estado de paginacion
   const [paginacion, setPaginacion] = useState(null);
-  const [pagina,     setPagina]     = useState(1);
- 
+  const [pagina, setPagina] = useState(1);
+
   const cargar = async (p = pagina) => {
     try {
       setLoading(true);
       const { data } = await API.get('/proveedores', {
         params: { page: p, limit: 3 }
-    });
+      });
       setProveedores(data.data);
       setPaginacion(data.paginacion);
-  } catch {
+    } catch {
       setError('Error al cargar proveedores');
-  } finally {
+    } finally {
       setLoading(false);
-  }
-};
+    }
+  };
 
   useEffect(() => { cargar(pagina); }, [pagina]);
 
@@ -52,10 +52,10 @@ const Proveedores = () => {
 
   const abrirEditar = (p) => {
     setForm({
-      nombre:    p.nombre,
-      ruc:       p.ruc       || '',
-      telefono:  p.telefono  || '',
-      email:     p.email     || '',
+      nombre: p.nombre,
+      ruc: p.ruc || '',
+      telefono: p.telefono || '',
+      email: p.email || '',
       direccion: p.direccion || ''
     });
     setEditando(p.id);
@@ -106,12 +106,12 @@ const Proveedores = () => {
     <div>
       {/* Título */}
       <div style={{
-        display:        'flex',
+        display: 'flex',
         justifyContent: 'space-between',
-        alignItems:     'center',
-        marginBottom:   '24px',
-        flexWrap:       'wrap',
-        gap:            '12px'
+        alignItems: 'center',
+        marginBottom: '24px',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         <div>
           <h4 style={{ margin: 0, fontWeight: 700, color: '#1a1f2e' }}>Proveedores</h4>
@@ -131,7 +131,7 @@ const Proveedores = () => {
         </Button>
       </div>
 
-      <AlertaMensaje tipo="danger"  mensaje={error} onClose={() => setError('')} />
+      <AlertaMensaje tipo="danger" mensaje={error} onClose={() => setError('')} />
       <AlertaMensaje tipo="success" mensaje={exito} onClose={() => setExito('')} />
 
       {/* Tabla */}
@@ -185,35 +185,37 @@ const Proveedores = () => {
             )}
           </tbody>
         </Table>
+      {/* Dentro del div de la tabla, después del Table */}
         <Paginacion
-         paginacion={paginacion}
-         onCambiar={(p) => setPagina(p)}
+          paginacion={paginacion}
+          onCambiar={(p) => setPagina(p)}
         />
+
       </div>
 
       {/* Modal Crear/Editar */}
       <ModalCrearProveedor
-      show={modal}
-      form={form}
-      onHide={() => setModal(false)}
-      onSubmit={guardar}
-      onChange={handleChange}
-       onClick={() => setModal(false)}
-       editando={editando}
-       guardando={guardando}
-      
+        show={modal}
+        form={form}
+        onHide={() => setModal(false)}
+        onSubmit={guardar}
+        onChange={handleChange}
+        onClick={() => setModal(false)}
+        editando={editando}
+        guardando={guardando}
+
       />
-      
+
 
       {/* Modal Eliminar */}
 
       <ModalEliminarProveedor
-      show={modalElim} 
-      onHide={() => setModalElim(false)}
-      proveedor={eliminando}
-      onEliminar={eliminar}
+        show={modalElim}
+        onHide={() => setModalElim(false)}
+        proveedor={eliminando}
+        onEliminar={eliminar}
       />
-    
+
 
     </div>
   );
