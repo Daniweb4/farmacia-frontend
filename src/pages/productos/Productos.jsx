@@ -1,10 +1,13 @@
 import { useState, useEffect }                    from 'react';
-import { Modal, Button, Table, Form, Row, Col }   from 'react-bootstrap';
+import {  Button, Table, Form, Col, Row} from 'react-bootstrap';
 import API           from '../../api/axios';
 import Loading       from '../../components/common/Loading';
 import AlertaMensaje from '../../components/common/AlertaMensaje';
 import { formatMoney } from '../../helpers/format';
 import { FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
+import ModalcrearProducto from './ModalcrearProducto';
+import ModalEliminarProducto from './ModalEliminarProducto';
+
 
 const inicial = {
   nombre: '', descripcion: '', codigo_barra: '',
@@ -289,146 +292,28 @@ const Productos = () => {
       </div>
 
       {/* Modal Crear/Editar */}
-      <Modal show={modal} onHide={() => setModal(false)} centered size="lg">
-        <Modal.Header closeButton style={{ border: 'none', paddingBottom: 0 }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>
-            {editando ? 'Editar Producto' : 'Nuevo Producto'}
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={guardar}>
-          <Modal.Body style={{ padding: '20px 24px' }}>
-            <Row>
-              <Col md={8}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Nombre *</Form.Label>
-                  <Form.Control
-                    name="nombre" value={form.nombre}
-                    onChange={handleChange} required
-                    placeholder="Nombre del producto"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Código de barra</Form.Label>
-                  <Form.Control
-                    name="codigo_barra" value={form.codigo_barra}
-                    onChange={handleChange}
-                    placeholder="7501234567890"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={12}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Descripción</Form.Label>
-                  <Form.Control
-                    as="textarea" rows={2}
-                    name="descripcion" value={form.descripcion}
-                    onChange={handleChange}
-                    placeholder="Descripción opcional"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Precio compra *</Form.Label>
-                  <Form.Control
-                    type="number" step="0.01" min="0"
-                    name="precio_compra" value={form.precio_compra}
-                    onChange={handleChange} required
-                    placeholder="0.00"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Precio venta *</Form.Label>
-                  <Form.Control
-                    type="number" step="0.01" min="0"
-                    name="precio_venta" value={form.precio_venta}
-                    onChange={handleChange} required
-                    placeholder="0.00"
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Stock mínimo</Form.Label>
-                  <Form.Control
-                    type="number" min="0"
-                    name="stock_minimo" value={form.stock_minimo}
-                    onChange={handleChange}
-                    style={{ borderRadius: '8px' }}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Categoría</Form.Label>
-                  <Form.Select
-                    name="id_categoria" value={form.id_categoria}
-                    onChange={handleChange}
-                    style={{ borderRadius: '8px' }}
-                  >
-                    <option value="">Seleccionar categoría</option>
-                    {categorias.map(c => (
-                      <option key={c.id} value={c.id}>{c.nombre}</option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label style={{ fontWeight: 600, fontSize: '13px' }}>Proveedor principal</Form.Label>
-                  <Form.Select
-                    name="id_proveedor_principal" value={form.id_proveedor_principal}
-                    onChange={handleChange}
-                    style={{ borderRadius: '8px' }}
-                  >
-                    <option value="">Seleccionar proveedor</option>
-                    {proveedores.map(p => (
-                      <option key={p.id} value={p.id}>{p.nombre}</option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-          </Modal.Body>
-          <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-            <Button variant="light" onClick={() => setModal(false)} style={{ borderRadius: '8px' }}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={guardando} style={{
-              background: '#4e9af1', border: 'none', borderRadius: '8px'
-            }}>
-              {guardando ? 'Guardando...' : 'Guardar'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      <ModalcrearProducto
+      show={modal}
+      onHide={()=> setModal(false)}
+      onChange={handleChange}
+      onSubmit={guardar}
+      onClick={() => setModal(false)}
+      guardando={guardando}
+      editando={editando}
+      form={form}
+      categorias={categorias}
+      proveedores={proveedores}
+        />
+    <ModalEliminarProducto
+    show={modalElim}
+    onHide={() => setModalElim(false)} 
+    producto={eliminando}
+    onClick={() => setModalElim(false)} 
+    onEliminarProducto={eliminar}
+    />
 
       {/* Modal Eliminar */}
-      <Modal show={modalElim} onHide={() => setModalElim(false)} centered>
-        <Modal.Header closeButton style={{ border: 'none' }}>
-          <Modal.Title style={{ fontWeight: 700, fontSize: '18px' }}>Eliminar Producto</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ padding: '0 24px 20px' }}>
-          ¿Estás seguro que deseas eliminar <strong>{eliminando?.nombre}</strong>?
-        </Modal.Body>
-        <Modal.Footer style={{ border: 'none', paddingTop: 0 }}>
-          <Button variant="light" onClick={() => setModalElim(false)} style={{ borderRadius: '8px' }}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={eliminar} style={{ borderRadius: '8px' }}>
-            Eliminar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+     
     </div>
   );
 };

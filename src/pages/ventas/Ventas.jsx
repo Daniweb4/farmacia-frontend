@@ -1,42 +1,43 @@
-import { useState, useEffect }                  from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Button, Table, Form, Row, Col } from 'react-bootstrap';
-import API           from '../../api/axios';
-import Loading       from '../../components/common/Loading';
+import API from '../../api/axios';
+import Loading from '../../components/common/Loading';
 import AlertaMensaje from '../../components/common/AlertaMensaje';
 import { formatMoney, formatFechaHora } from '../../helpers/format';
 import { FaPlus, FaEye, FaBan, FaSearch } from 'react-icons/fa';
-
+import { generarFacturaPDF } from '../../helpers/facturaPDF';
+import { FaFilePdf } from 'react-icons/fa';
 const itemInicial = {
   id_producto: '', id_lote: '', cantidad: 1, precio_unitario: ''
 };
 
 const Ventas = () => {
-  const [ventas,     setVentas]     = useState([]);
-  const [productos,  setProductos]  = useState([]);
-  const [clientes,   setClientes]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState('');
-  const [exito,      setExito]      = useState('');
+  const [ventas, setVentas] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [exito, setExito] = useState('');
 
   // Filtros
-  const [desde,      setDesde]      = useState('');
-  const [hasta,      setHasta]      = useState('');
+  const [desde, setDesde] = useState('');
+  const [hasta, setHasta] = useState('');
 
   // Modal nueva venta
-  const [modalNueva,  setModalNueva]  = useState(false);
-  const [idCliente,   setIdCliente]   = useState('');
-  const [descuento,   setDescuento]   = useState(0);
-  const [detalles,    setDetalles]    = useState([{ ...itemInicial }]);
-  const [guardando,   setGuardando]   = useState(false);
-  const [lotesDisp,   setLotesDisp]   = useState({});
+  const [modalNueva, setModalNueva] = useState(false);
+  const [idCliente, setIdCliente] = useState('');
+  const [descuento, setDescuento] = useState(0);
+  const [detalles, setDetalles] = useState([{ ...itemInicial }]);
+  const [guardando, setGuardando] = useState(false);
+  const [lotesDisp, setLotesDisp] = useState({});
 
   // Modal detalle
   const [modalDetalle, setModalDetalle] = useState(false);
-  const [ventaActual,  setVentaActual]  = useState(null);
+  const [ventaActual, setVentaActual] = useState(null);
 
   // Modal anular
-  const [modalAnular,  setModalAnular]  = useState(false);
-  const [anulando,     setAnulando]     = useState(null);
+  const [modalAnular, setModalAnular] = useState(false);
+  const [anulando, setAnulando] = useState(null);
 
   // ─── Cargar ────────────────────────────────────────────
   const cargar = async (d = desde, h = hasta) => {
@@ -47,7 +48,7 @@ const Ventas = () => {
       if (h) params.hasta = h;
 
       const [resVent, resProd, resCli] = await Promise.all([
-        API.get('/ventas',    { params }),
+        API.get('/ventas', { params }),
         API.get('/productos'),
         API.get('/clientes')
       ]);
@@ -72,7 +73,7 @@ const Ventas = () => {
     if (!idProducto) return;
     try {
       const { data } = await API.get(`/productos/${idProducto}`);
-      const lotes    = data.data.lotes || [];
+      const lotes = data.data.lotes || [];
       setLotesDisp(prev => ({ ...prev, [index]: lotes }));
 
       // Si solo hay un lote, seleccionarlo automáticamente
@@ -119,7 +120,7 @@ const Ventas = () => {
   };
 
   const calcularImpuesto = () => parseFloat((calcularSubtotal() * 0.15).toFixed(2));
-  const calcularTotal    = () => parseFloat((calcularSubtotal() - parseFloat(descuento || 0) + calcularImpuesto()).toFixed(2));
+  const calcularTotal = () => parseFloat((calcularSubtotal() - parseFloat(descuento || 0) + calcularImpuesto()).toFixed(2));
 
   // ─── Guardar venta ─────────────────────────────────────
   const guardar = async (e) => {
@@ -128,11 +129,11 @@ const Ventas = () => {
     try {
       await API.post('/ventas', {
         id_cliente: idCliente ? parseInt(idCliente) : null,
-        descuento:  parseFloat(descuento || 0),
-        detalles:   detalles.map(d => ({
-          id_producto:     parseInt(d.id_producto),
-          id_lote:         parseInt(d.id_lote),
-          cantidad:        parseInt(d.cantidad),
+        descuento: parseFloat(descuento || 0),
+        detalles: detalles.map(d => ({
+          id_producto: parseInt(d.id_producto),
+          id_lote: parseInt(d.id_lote),
+          cantidad: parseInt(d.cantidad),
           precio_unitario: parseFloat(d.precio_unitario)
         }))
       });
@@ -203,7 +204,7 @@ const Ventas = () => {
         </Button>
       </div>
 
-      <AlertaMensaje tipo="danger"  mensaje={error} onClose={() => setError('')} />
+      <AlertaMensaje tipo="danger" mensaje={error} onClose={() => setError('')} />
       <AlertaMensaje tipo="success" mensaje={exito} onClose={() => setExito('')} />
 
       {/* Filtro por fecha */}
@@ -292,8 +293,8 @@ const Ventas = () => {
                   </td>
                   <td style={{ padding: '14px 20px' }}>
                     <span style={{
-                      background:   v.estado === 'completada' ? '#f0fff4' : '#fff5f5',
-                      color:        v.estado === 'completada' ? '#48bb78' : '#fc8181',
+                      background: v.estado === 'completada' ? '#f0fff4' : '#fff5f5',
+                      color: v.estado === 'completada' ? '#48bb78' : '#fc8181',
                       borderRadius: '6px', padding: '3px 8px',
                       fontSize: '12px', fontWeight: 600
                     }}>
@@ -321,6 +322,23 @@ const Ventas = () => {
                           <FaBan />
                         </button>
                       )}
+                      <button
+                        onClick={() => {
+                          API.get(`/ventas/${v.id}`).then(({ data }) => {
+                            generarFacturaPDF(data.data);
+                          });
+                        }}
+                        style={{
+                          background: '#fff5f0',
+                          color: '#ed8936',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <FaFilePdf />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -328,6 +346,7 @@ const Ventas = () => {
             )}
           </tbody>
         </Table>
+
       </div>
 
       {/* Modal Nueva Venta */}
@@ -496,6 +515,7 @@ const Ventas = () => {
             }}>
               {guardando ? 'Procesando...' : 'Registrar Venta'}
             </Button>
+
           </Modal.Footer>
         </Form>
       </Modal>
@@ -583,6 +603,27 @@ const Ventas = () => {
             </>
           )}
         </Modal.Body>
+        <Button
+          variant="light"
+          onClick={() => generarFacturaPDF(ventaActual)}
+          style={{
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: '#ed8936',
+            border: '1px solid #ed8936'
+          }}
+        >
+          <FaFilePdf /> Descargar PDF
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => setModalDetalle(false)}
+          style={{ borderRadius: '8px' }}
+        >
+          Cerrar
+        </Button>
       </Modal>
 
       {/* Modal Anular */}

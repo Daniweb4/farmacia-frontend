@@ -6,6 +6,7 @@ import AlertaMensaje   from '../../components/common/AlertaMensaje';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { ModalCrearCategoria } from './ModalCrearCategoria';
 import { ModelEliminarCategoria } from './ModelEliminarCategoria';
+import Paginacion from '../../components/common/Paginacion';
 
 const inicial = { nombre: '', descripcion: '' };
 
@@ -14,7 +15,9 @@ const Categorias = () => {
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState('');
   const [exito,      setExito]      = useState('');
-
+//Paginacion
+  const [paginacion, setPaginacion] = useState(null);
+  const [pagina,     setPagina]     = useState(1);
   // Modal
   const [modal,      setModal]      = useState(false);
   const [modalElim,  setModalElim]  = useState(false);
@@ -24,19 +27,21 @@ const Categorias = () => {
   const [guardando,  setGuardando]  = useState(false);
 
   // ─── Cargar categorías ──────────────────────────────────
-  const cargar = async () => {
+  const cargar = async (p = pagina) => {
     try {
       setLoading(true);
-      const { data } = await API.get('/categorias');
+      const { data } = await API.get('/categorias', {
+        params: { page: p, limit: 3 }
+    });
       setCategorias(data.data);
-    } catch {
+      setPaginacion(data.paginacion);
+  } catch {
       setError('Error al cargar categorías');
-    } finally {
+  } finally {
       setLoading(false);
-    }
-  };
-
-  useEffect(() => { cargar(); }, []);
+  }
+};
+  useEffect(() => { cargar(pagina); }, [pagina]);
 
   // ─── Abrir modal crear ──────────────────────────────────
   const abrirCrear = () => {
@@ -199,6 +204,11 @@ const Categorias = () => {
             )}
           </tbody>
         </Table>
+        {/* Dentro del div de la tabla, después del Table */}
+        <Paginacion
+         paginacion={paginacion}
+         onCambiar={(p) => setPagina(p)}
+        />
       </div>
 
       {/* Modal Crear/Editar */}
